@@ -1,16 +1,137 @@
-# React + Vite
+# 🚦 Smart Traffic Monitoring Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An AI-powered Smart Traffic Monitoring Dashboard for real-time traffic monitoring, vehicle detection, live camera surveillance, and traffic analytics.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 📌 Project Overview
 
-## React Compiler
+The Smart Traffic Monitoring Dashboard is designed to monitor traffic conditions in real time using Artificial Intelligence and modern web technologies.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+This project provides:
 
-## Expanding the ESLint configuration
+- 🚗 Vehicle Detection
+- 🚦 Traffic Signal Monitoring
+- 📷 Live Camera Feed
+- 🗺️ Live Traffic Map
+- 📊 Traffic Analytics Dashboard
+- 📈 Vehicle Counting
+- ⚡ Real-time Updates
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## ✨ Features
+
+- Dashboard Overview
+- Live Traffic Monitoring
+- AI Vehicle Detection
+- Vehicle Counter
+- Traffic Signal Status
+- Traffic Density Charts
+- Interactive Live Map
+- Responsive User Interface
+
+---
+
+## 🛠 Technologies Used
+
+### Frontend
+- React.js
+- Vite
+- Tailwind CSS
+- React Icons
+- Recharts
+
+### Backend
+- Node.js
+- Express.js
+
+### AI Module
+- Python
+- OpenCV
+- YOLO
+- Ultralytics
+
+---
+
+## 📂 Project Structure
+
+```
+Traffic-Monitoring-Dashboard
+│
+├── client/
+├── server/
+├── python-ai/
+├── package.json
+└── .gitignore
+```
+
+---
+
+## 🚀 Installation
+
+### Clone Repository
+
+```bash
+git clone https://github.com/magulur2022-del/Traffic-Monitoring-Dashboard.git
+```
+
+### Install Frontend
+
+```bash
+cd client
+npm install
+npm run dev
+```
+
+### Install Backend
+
+```bash
+cd server
+npm install
+npm start
+```
+
+### Run AI Module
+
+```bash
+cd python-ai
+pip install -r requirements.txt
+python detect.py
+```
+
+---
+
+## 📷 Modules
+
+- Dashboard
+- Live Map
+- Live Camera
+- Vehicle Counter
+- Traffic Analytics
+- Traffic Signal Status
+- Reports
+
+---
+
+## 🔮 Future Enhancements
+
+- Emergency Vehicle Detection
+- AI Traffic Prediction
+- Number Plate Recognition
+- Accident Detection
+- Automatic Signal Control
+- Weather-Based Traffic Analysis
+
+---
+
+## 👨‍💻 Developer
+
+**Naga Maguluri**
+
+GitHub:
+https://github.com/magulur2022-del
+
+---
+
+⭐ If you like this project, don't forget to star this repository.
