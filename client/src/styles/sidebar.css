@@ -1,0 +1,59 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.sidebar {
+  width: 260px;
+  height: 100vh;
+  background: #111827;
+  color: white;
+  padding: 30px 20px;
+}
+
+.logo {
+  text-align: center;
+  margin-bottom: 40px;
+  color: #38bdf8;
+}
+
+.menu {
+  list-style: none;
+}
+
+.menu li {
+  padding: 15px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: 0.3s;
+}
+
+.menu li:hover {
+  background: #38bdf8;
+}
+
+.profile {
+  margin-top: 60px;
+  text-align: center;
+}
+
+.profile img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 3px solid #38bdf8;
+}
+
+.profile h3 {
+  margin-top: 10px;
+}
+
+.profile p {
+  color: #cbd5e1;
+  font-size: 14px;
+}
