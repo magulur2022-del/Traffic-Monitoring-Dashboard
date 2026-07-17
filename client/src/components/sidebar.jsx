@@ -10,6 +10,7 @@ import {
   FaInfoCircle,
   FaTimes,
   FaCircle,
+  FaDatabase,
 } from "react-icons/fa";
 
 import { NavLink } from "react-router-dom";
@@ -50,6 +51,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       icon: <FaExclamationTriangle />,
       label: "Reports",
       path: "/reports",
+    },
+    {
+      icon: <FaDatabase />,
+      label: "Traffic Records",
+      path: "/traffic-records",
     },
     {
       icon: <FaCog />,

@@ -13,6 +13,7 @@ import TrafficJunctionPage from "./pages/TrafficJunctionPage";
 import AboutPage from "./pages/AboutPage";
 import Login from "./pages/Login";
 import VehicleDetails from "./pages/VehicleDetails";
+import TrafficRecordsPage from "./pages/TrafficRecordsPage";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoadingScreen from "./components/LoadingScreen";
@@ -35,6 +36,7 @@ function AppRoutes() {
 
   const handleLogout = () => {
     setIsLoggedIn(false);
+    localStorage.removeItem("isLoggedIn");
     navigate("/login");
   };
 
@@ -109,6 +111,16 @@ function AppRoutes() {
         element={
           <ProtectedRoute isLoggedIn={isLoggedIn}>
             <TrafficJunctionPage onLogout={handleLogout} />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Traffic Records */}
+      <Route
+        path="/traffic-records"
+        element={
+          <ProtectedRoute isLoggedIn={isLoggedIn}>
+            <TrafficRecordsPage />
           </ProtectedRoute>
         }
       />

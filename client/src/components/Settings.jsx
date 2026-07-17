@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   FaUserCircle,
   FaBell,
@@ -8,6 +9,27 @@ import {
 } from "react-icons/fa";
 
 const Settings = () => {
+  const [theme, setTheme] = useState(
+    localStorage.getItem("theme") || "Light"
+  );
+
+  useEffect(() => {
+    localStorage.setItem("theme", theme);
+
+    if (theme === "Dark") {
+      document.body.classList.add("bg-gray-900");
+      document.body.classList.remove("bg-gray-100");
+    } else {
+      document.body.classList.add("bg-gray-100");
+      document.body.classList.remove("bg-gray-900");
+    }
+  }, [theme]);
+
+  const handleSave = () => {
+    localStorage.setItem("theme", theme);
+    alert("✅ Settings Saved Successfully!");
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mt-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">
@@ -35,7 +57,7 @@ const Settings = () => {
         </div>
       </div>
 
-      {/* Notification */}
+      {/* Notifications */}
       <div className="flex justify-between items-center border rounded-lg p-4 mb-4">
         <div className="flex items-center gap-3">
           <FaBell className="text-yellow-500 text-xl" />
@@ -75,15 +97,22 @@ const Settings = () => {
           <span className="font-medium">Theme</span>
         </div>
 
-        <select className="border rounded px-3 py-1">
-          <option>Light</option>
-          <option>Dark</option>
+        <select
+          value={theme}
+          onChange={(e) => setTheme(e.target.value)}
+          className="border rounded px-3 py-1"
+        >
+          <option value="Light">Light</option>
+          <option value="Dark">Dark</option>
         </select>
       </div>
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition">
+        <button
+          onClick={handleSave}
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition"
+        >
           <FaSave />
           Save Settings
         </button>
