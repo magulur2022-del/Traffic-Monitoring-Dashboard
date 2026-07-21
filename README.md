@@ -1,124 +1,105 @@
-# 🚦 Smart Traffic Monitoring Dashboard
+#  Smart Traffic Monitoring Dashboard
 
-<p align="center">
-  <b>AI-Powered Real-Time Traffic Monitoring and Management System</b>
-</p>
+A Full Stack Smart Traffic Monitoring Dashboard developed using the MERN Stack. This project helps monitor traffic conditions, manage traffic junctions, and visualize real-time traffic information through an interactive dashboard.
 
 ---
 
-## 📌 Overview
+#  Features
 
-Smart Traffic Monitoring Dashboard is an intelligent traffic management system that provides real-time monitoring of traffic conditions using Artificial Intelligence, computer vision, and modern web technologies.
-
-The system helps monitor:
-
-- 🚗 Vehicle movement
-- 🚦 Traffic signal status
-- 📷 Live camera surveillance
-- 🗺️ Traffic locations
-- 📊 Traffic analytics
-- 📈 Vehicle statistics
-
----
-
-# ✨ Key Features
-
-## 🔐 Authentication System
-- Secure login page
-- Protected dashboard routes
-- User access management
-
-## 📊 Smart Dashboard
-- Real-time traffic overview
-- Vehicle count display
-- Traffic density monitoring
-- Incident tracking
-
-## 🚘 AI Vehicle Detection
-- Vehicle identification
-- Automatic vehicle counting
-- Traffic flow analysis
-
-## 📷 Live Camera Monitoring
-- Real-time camera feed
-- Road surveillance
-- Traffic observation
-
-## 🗺️ Live Traffic Map
-- Interactive traffic visualization
-- Location-based monitoring
-- Junction tracking
-
-## 🚦 Traffic Signal Management
-- Signal status monitoring
-- Traffic light control interface
-- Junction-wise information
-
-## 📈 Analytics & Reports
-- Traffic charts
-- Vehicle statistics
-- Data visualization
-- Report generation
+- User Login
+- Traffic Dashboard
+- Vehicle Count Monitoring
+- Traffic Signal Management
+- Traffic Junction Management
+- Live Traffic Map
+- Camera Feed
+- Traffic Analytics
+- Reports
+- MongoDB Atlas Integration
+- REST API using Express.js
 
 ---
 
-# 🛠 Tech Stack
+#  Tech Stack
 
 ## Frontend
-
 - React.js
 - Vite
 - Tailwind CSS
 - React Router DOM
 - React Icons
 - Recharts
+- Axios
 
 ## Backend
-
 - Node.js
 - Express.js
+- MongoDB Atlas
+- Mongoose
+- dotenv
+- CORS
 
-## AI & Computer Vision
-
+## AI
 - Python
 - OpenCV
 - YOLO
-- Ultralytics
-
-## Development Tools
-
-- VS Code
-- Git
-- GitHub
 
 ---
 
-# 📂 Project Structure
+#  Project Structure
 
 ```text
 Traffic-Monitoring-Dashboard
-
 │
 ├── client
 │   ├── src
-│   ├── screenshots
-│   ├── package.json
+│   ├── public
+│   └── package.json
 │
 ├── server
-│   ├── routes
+│   ├── config
 │   ├── controllers
-│
-├── python-ai
-│   ├── detection
+│   ├── middleware
+│   ├── models
+│   ├── routes
+│   ├── .env.example
+│   ├── package.json
+│   └── server.js
 │
 ├── README.md
-├── package.json
 └── .gitignore
 ```
 
 ---
 
-# 🚀 Installation
+#  Database Schema
+
+Traffic Collection
+
+| Field | Type |
+|-------|------|
+| name | String |
+| latitude | Number |
+| longitude | Number |
+| vehicleCount | Number |
+| congestionLevel | String |
+| signal | String |
+
+---
+
+#  REST API Endpoints
+
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| GET | /api/traffic | Get All Traffic Records |
+| GET | /api/traffic/:id | Get Traffic Record By ID |
+| POST | /api/traffic | Add New Traffic Record |
+| PUT | /api/traffic/:id | Update Traffic Record |
+| DELETE | /api/traffic/:id | Delete Traffic Record |
+
+---
+
+#  Installation
 
 ## Clone Repository
 
@@ -126,102 +107,89 @@ Traffic-Monitoring-Dashboard
 git clone https://github.com/magulur2022-del/Traffic-Monitoring-Dashboard.git
 ```
 
----
-
 ## Frontend
 
 ```bash
 cd client
-
 npm install
-
 npm run dev
 ```
-
----
 
 ## Backend
 
 ```bash
 cd server
-
 npm install
-
-npm start
+npm run dev
 ```
 
 ---
 
-## AI Module
+#  Environment Variables
 
-```bash
-cd python-ai
+Create a `.env` file inside the server folder.
 
-pip install -r requirements.txt
+```env
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+```
 
-python detect.py
+Create a `.env.example` file.
+
+```env
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
 ```
 
 ---
 
-# 📷 Screenshots
+#  API Testing
 
-## Login Page
+The backend APIs were tested using Thunder Client.
 
-![Login](client/screenshots/01-Login-Page.png)
+- GET All Traffic Records
+- GET Traffic Record By ID
+- POST New Traffic Record
+- PUT Update Traffic Record
+- DELETE Traffic Record
 
-## Dashboard
-
-![Dashboard](client/screenshots/02-Dashboard.png)
-
-## Live Traffic Map
-
-![Live Map](client/screenshots/03-Live-Traffic-Map.png)
-
-## Traffic Signal Management
-
-![Traffic Signal](client/screenshots/04-Traffic-Signal-Management.png)
-
-## Traffic Junction Management
-
-![Traffic Junction](client/screenshots/05-Traffic-Junction-Management.png)
-
-## Analytics
-
-![Analytics](client/screenshots/06-Traffic-Analytics.png)
-
-## Reports
-
-![Reports](client/screenshots/07-Reports-and-Notifications.png)
-
-## Settings
-
-![Settings](client/screenshots/08-Settings.png)
-
-## About Project
-
-![About](client/screenshots/09-About-Project.png)
+All CRUD operations are connected successfully with MongoDB Atlas using Mongoose.
 
 ---
 
-# 🔮 Future Enhancements
+#  Screenshots
 
-- 🚑 Emergency vehicle detection
-- 🔢 Number plate recognition
-- 🚨 Accident detection
-- 🤖 AI traffic prediction
-- 🚦 Automatic traffic signal optimization
-- 🌦 Weather-based traffic analysis
-
----
-
-# 👨‍💻 Developer
-
-**Naga Maguluri**
-
-GitHub:
-https://github.com/magulur2022-del
+- Login Page
+- Dashboard
+- Live Traffic Map
+- Traffic Signal Management
+- Traffic Junction Management
+- Traffic Analytics
+- MongoDB Atlas
+- Thunder Client GET API
+- Thunder Client POST API
+- Thunder Client PUT API
+- Thunder Client DELETE API
 
 ---
 
-⭐ If you find this project useful, consider starring the repository.
+#  Future Enhancements
+
+- Emergency Vehicle Detection
+- Automatic Traffic Signal Control
+- Number Plate Recognition
+- Accident Detection
+- AI Traffic Prediction
+- Weather-Based Traffic Analysis
+
+---
+
+#  Developer
+
+**Nagamani Maguluri**
+
+GitHub: https://github.com/magulur2022-del
+
+---
+
+##  Star this repository if you like this project.

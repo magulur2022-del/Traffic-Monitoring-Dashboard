@@ -13,7 +13,7 @@ import LiveActivity from "../components/LiveActivity";
 import SearchResults from "../components/SearchResults";
 import DashboardFooter from "../components/DashboardFooter";
 
-import trafficLocations from "../data/trafficLocations";
+import { getAllTraffic } from "../services/trafficService";
 
 import {
   FaCar,
@@ -26,27 +26,46 @@ import {
 const Dashboard = ({ onLogout }) => {
 
   const [search, setSearch] = useState("");
-
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  useEffect(() => {
+  const [trafficLocations, setTrafficLocations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
-
     return () => clearInterval(timer);
-
   }, []);
 
-  const filteredLocations =
-    trafficLocations.filter((location) =>
-      location.area
-        .toLowerCase()
-        .includes(search.toLowerCase())
-    );
+  useEffect(() => {
+    const fetchTraffic = async () => {
+      try {
+        setLoading(true);
+        const data = await getAllTraffic();
+        setTrafficLocations(data);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching traffic data:", err);
+        setError("Failed to load traffic data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTraffic();
+  }, []);
+
+  const filteredLocations = trafficLocations.filter((location) =>
+    location.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const totalVehicles = trafficLocations.reduce(
+    (sum, item) => sum + (item.vehicleCount || 0),
+    0
+  );
 
   const formattedTime =
     currentTime.toLocaleTimeString("en-IN", {
@@ -64,7 +83,6 @@ const Dashboard = ({ onLogout }) => {
     });
 
   return (
-
     <div className="min-h-screen bg-gray-100">
 
       <Sidebar
@@ -84,14 +102,10 @@ const Dashboard = ({ onLogout }) => {
 
         <main className="flex-1 p-6 overflow-y-auto">
 
-          {/* Hero Section */}
-
           <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500 rounded-3xl shadow-xl p-8 text-white mb-8">
-
             <div className="flex flex-col lg:flex-row justify-between gap-8">
 
               <div className="flex-1">
-
                 <p className="uppercase tracking-widest text-blue-100 text-sm font-semibold">
                   Smart City Project
                 </p>
@@ -110,7 +124,6 @@ const Dashboard = ({ onLogout }) => {
                 </p>
 
                 <div className="mt-6 flex flex-wrap gap-4">
-
                   <span className="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold animate-pulse">
                     ● LIVE Monitoring Active
                   </span>
@@ -122,71 +135,59 @@ const Dashboard = ({ onLogout }) => {
                   <span className="bg-white/20 px-4 py-2 rounded-full text-sm">
                     🕒 {formattedTime}
                   </span>
-
                 </div>
 
                 <p className="mt-3 text-blue-100">
                   {formattedDate}
                 </p>
-
               </div>
 
               <div className="grid grid-cols-2 gap-5">
-
                 <div className="bg-white/15 rounded-2xl p-6 text-center">
-                  <h2 className="text-4xl font-bold">
-                    24
-                  </h2>
-
+                  <h2 className="text-4xl font-bold">24</h2>
                   <p>Active Signals</p>
                 </div>
 
                 <div className="bg-white/15 rounded-2xl p-6 text-center">
-                  <h2 className="text-4xl font-bold">
-                    18
-                  </h2>
-
+                  <h2 className="text-4xl font-bold">18</h2>
                   <p>Online Cameras</p>
                 </div>
 
                 <div className="bg-white/15 rounded-2xl p-6 text-center">
-                  <h2 className="text-3xl font-bold text-green-300">
-                    Online
-                  </h2>
-
+                  <h2 className="text-3xl font-bold text-green-300">Online</h2>
                   <p>System Status</p>
                 </div>
 
                 <div className="bg-white/15 rounded-2xl p-6 text-center">
-                  <h2 className="text-4xl font-bold">
-                    2357
-                  </h2>
-
+                  <h2 className="text-4xl font-bold">{totalVehicles}</h2>
                   <p>Today's Vehicles</p>
                 </div>
-
               </div>
 
             </div>
-
           </div>
 
-          <QuickOverview />
+          <QuickOverview trafficLocations={trafficLocations} />
+
+          {loading && (
+            <div className="mt-8 text-center text-gray-500">
+              Loading traffic data...
+            </div>
+          )}
+
+          {error && (
+            <div className="mt-8 text-center text-red-500">
+              {error}
+            </div>
+          )}
 
           {search !== "" && (
-
             <div className="mt-8">
-
-              <SearchResults
-                results={filteredLocations}
-              />
-
+              <SearchResults results={filteredLocations} />
             </div>
-
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mt-8">
-
             <StatCard
               title="Cars"
               value="1245"
@@ -226,45 +227,33 @@ const Dashboard = ({ onLogout }) => {
               icon={<FaAmbulance />}
               color="text-purple-500"
             />
-          </div>          {/* Emergency Notification */}
-
-          <div className="mt-8">
-            <EmergencyNotification />
           </div>
 
-          {/* Vehicle Counter */}
-
           <div className="mt-8">
-            <VehicleCounter />
+            <EmergencyNotification trafficLocations={trafficLocations} />
           </div>
 
-          {/* Live Traffic Status */}
-
           <div className="mt-8">
-            <LiveTrafficStatus />
+            <VehicleCounter trafficLocations={trafficLocations} />
           </div>
 
-          {/* AI Vehicle Detection */}
-
           <div className="mt-8">
-            <AIVehicleDetection />
+            <LiveTrafficStatus trafficLocations={trafficLocations} />
           </div>
 
-          {/* Mini Map & Live Activity */}
+          <div className="mt-8">
+            <AIVehicleDetection trafficLocations={trafficLocations} />
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-
             <div className="bg-white rounded-2xl shadow-lg p-4">
-              <MiniMap />
+              <MiniMap trafficLocations={trafficLocations} />
             </div>
 
             <div className="bg-white rounded-2xl shadow-lg p-4">
-              <LiveActivity />
+              <LiveActivity trafficLocations={trafficLocations} />
             </div>
-
           </div>
-
-          {/* Dashboard Footer */}
 
           <div className="mt-10">
             <DashboardFooter />
@@ -275,7 +264,6 @@ const Dashboard = ({ onLogout }) => {
       </div>
 
     </div>
-
   );
 };
 

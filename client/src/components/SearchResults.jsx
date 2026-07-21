@@ -14,16 +14,21 @@ const SearchResults = ({ results }) => {
 
       {results.map((item) => (
         <div
-          key={item.id}
+          key={item._id}
           className="border rounded-lg p-4 mb-3"
         >
-          <h3 className="text-lg font-bold">{item.area}</h3>
+          <h3 className="text-lg font-bold text-blue-600">
+            📍 {item.name}
+          </h3>
+
           <p>
-            <b>Status:</b> {item.status}
+            <b>Status:</b> {item.congestionLevel}
           </p>
+
           <p>
-            <b>Vehicles:</b> {item.vehicles}
+            <b>Vehicles:</b> {item.vehicleCount}
           </p>
+
           <p>
             <b>Signal:</b> {item.signal}
           </p>
