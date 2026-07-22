@@ -10,14 +10,15 @@ const {
 
 const router = express.Router();
 
-router.get("/", getAllTraffic);
+router
+  .route("/")
+  .get(getAllTraffic)
+  .post(createTraffic);
 
-router.get("/:id", getTrafficById);
-
-router.post("/", createTraffic);
-
-router.put("/:id", updateTraffic);
-
-router.delete("/:id", deleteTraffic);
+router
+  .route("/:id")
+  .get(getTrafficById)
+  .put(updateTraffic)
+  .delete(deleteTraffic);
 
 module.exports = router;

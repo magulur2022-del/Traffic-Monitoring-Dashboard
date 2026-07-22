@@ -1,348 +1,339 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-
-const junctions = [
-  "Brodipet",
-  "Lodge Center",
-  "Lakshmipuram",
-  "NTR Bus Stand",
-  "Kothapet",
-  "Arundelpet",
-  "Collector Office",
-];
-
-const signals = ["Green", "Yellow", "Red"];
-
-const events = [
-  "Normal Traffic",
-  "Heavy Traffic",
-  "Accident Reported",
-  "Emergency Vehicle",
-  "Signal Changed",
-];
+import {
+  getAllTraffic,
+  deleteTraffic,
+} from "../services/trafficService";
 
 const TrafficRecordsPage = () => {
+  const navigate = useNavigate();
   const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [search, setSearch] = useState("");
-
-  // Advanced Filters
   const [junctionFilter, setJunctionFilter] = useState("All");
   const [signalFilter, setSignalFilter] = useState("All");
-  const [eventFilter, setEventFilter] = useState("All");
+  const [congestionFilter, setCongestionFilter] = useState("All");
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("trafficRecords")) || [];
-    setRecords(stored);
+    loadTrafficRecords();
     sessionStorage.setItem("lastVisited", "Traffic Records");
   }, []);
 
-  const saveRecords = (updated) => {
-    setRecords(updated);
-    localStorage.setItem("trafficRecords", JSON.stringify(updated));
+  const loadTrafficRecords = async () => {
+    try {
+      setLoading(true);
+      const data = await getAllTraffic();
+      setRecords(data);
+      setError("");
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load traffic records.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const generateTrafficRecord = () => {
-    setRecords((prev) => {
-      const newRecord = {
-        id: Date.now() + Math.random(),
-        time: new Date().toLocaleTimeString(),
-        junction: junctions[Math.floor(Math.random() * junctions.length)],
-        vehicles: Math.floor(Math.random() * 120) + 20,
-        signal: signals[Math.floor(Math.random() * signals.length)],
-        event: events[Math.floor(Math.random() * events.length)],
-      };
-
-      const updated = [newRecord, ...prev].slice(0, 100);
-      localStorage.setItem("trafficRecords", JSON.stringify(updated));
-      return updated;
-    });
+  const deleteRecord = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this traffic record?"
+    );
+    if (!confirmDelete) return;
+    try {
+      await deleteTraffic(id);
+      await loadTrafficRecords();
+      alert("Traffic record deleted successfully.");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete traffic record.");
+    }
   };
 
-  useEffect(() => {
-    const seed = setTimeout(() => {
-      for (let i = 0; i < 5; i++) {
-        setTimeout(generateTrafficRecord, i * 300);
-      }
-    }, 0);
+  const totalVehicles = records.reduce(
+    (sum, item) => sum + Number(item.vehicleCount || 0),
+    0
+  );
+  const totalGreenSignals = records.filter(
+    (item) => item.signal === "Green"
+  ).length;
+  const totalHeavyTraffic = records.filter(
+    (item) => item.congestionLevel === "Heavy"
+  ).length;
 
-    const interval = setInterval(generateTrafficRecord, 15000);
-
-    return () => {
-      clearTimeout(seed);
-      clearInterval(interval);
-    };
-  }, []);
-
-  const deleteRecord = (id) => {
-    const updated = records.filter((item) => item.id !== id);
-    saveRecords(updated);
-  };
-
-  // PDF Export
   const downloadPDF = () => {
     const doc = new jsPDF();
-
     doc.setFontSize(18);
     doc.setTextColor(0, 102, 204);
     doc.text("Smart Traffic Monitoring Dashboard", 14, 18);
-
     doc.setFontSize(14);
     doc.setTextColor(0, 0, 0);
     doc.text("Traffic Records Report", 14, 28);
-
     doc.setFontSize(10);
     doc.text(`Generated : ${new Date().toLocaleString()}`, 14, 36);
-
     autoTable(doc, {
       startY: 45,
-      head: [["Time", "Junction", "Vehicles", "Signal", "Event"]],
+      head: [["Location", "Vehicle Count", "Congestion", "Signal"]],
       body: records.map((item) => [
-        item.time,
-        item.junction,
-        item.vehicles,
+        item.name,
+        item.vehicleCount,
+        item.congestionLevel,
         item.signal,
-        item.event,
       ]),
       headStyles: {
         fillColor: [37, 99, 235],
       },
     });
-
     doc.save("Traffic_Records_Report.pdf");
   };
 
-  // Excel Export
   const downloadExcel = () => {
     const excelData = records.map((item) => ({
-      Time: item.time,
-      Junction: item.junction,
-      Vehicles: item.vehicles,
+      Location: item.name,
+      Vehicles: item.vehicleCount,
+      Congestion: item.congestionLevel,
       Signal: item.signal,
-      Event: item.event,
     }));
-
     const worksheet = XLSX.utils.json_to_sheet(excelData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Traffic Records");
-
     const excelBuffer = XLSX.write(workbook, {
       bookType: "xlsx",
       type: "array",
     });
-
     const file = new Blob([excelBuffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+      type:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
     });
-
     saveAs(file, "Traffic_Records_Report.xlsx");
   };
 
-  // Advanced Filtering
   const filteredRecords = records.filter((item) => {
-    const matchSearch = item.junction
-      .toLowerCase()
-      .includes(search.toLowerCase());
-
+    const matchSearch = item.name.toLowerCase().includes(search.toLowerCase());
     const matchJunction =
-      junctionFilter === "All" || item.junction === junctionFilter;
-
+      junctionFilter === "All" || item.name === junctionFilter;
     const matchSignal = signalFilter === "All" || item.signal === signalFilter;
-
-    const matchEvent = eventFilter === "All" || item.event === eventFilter;
-
-    return matchSearch && matchJunction && matchSignal && matchEvent;
+    const matchCongestion =
+      congestionFilter === "All" || item.congestionLevel === congestionFilter;
+    return matchSearch && matchJunction && matchSignal && matchCongestion;
   });
 
+  const junctions = ["All", ...new Set(records.map((item) => item.name))];
+
   return (
-    <div className="p-8 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-2">🚦 Live Traffic Records</h1>
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-800">
+              🚦 Traffic Records
+            </h1>
+            <p className="text-gray-500 mt-2">
+              View and manage all traffic monitoring records.
+            </p>
+          </div>
 
-      <p className="text-gray-600 mb-6">
-        Last Visited :
-        <span className="font-semibold text-blue-600">
-          {" "}
-          {sessionStorage.getItem("lastVisited")}
-        </span>
-      </p>
+          <div className="flex gap-3 mt-5 md:mt-0">
+            <button
+              onClick={() => navigate("/add-traffic")}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg shadow"
+            >
+              + Add Record
+            </button>
 
-      {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-gray-500">Total Records</h2>
-          <p className="text-3xl font-bold text-blue-600">{records.length}</p>
+            <button
+              onClick={downloadPDF}
+              className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg shadow"
+            >
+              Export PDF
+            </button>
+
+            <button
+              onClick={downloadExcel}
+              className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg shadow"
+            >
+              Export Excel
+            </button>
+          </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-gray-500">Total Vehicles</h2>
-          <p className="text-3xl font-bold text-green-600">
-            {records.reduce((sum, item) => sum + Number(item.vehicles), 0)}
-          </p>
+        {/* Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-xl shadow p-6">
+            <h3 className="text-gray-500 text-sm">Total Locations</h3>
+            <p className="text-3xl font-bold text-blue-600 mt-2">
+              {records.length}
+            </p>
+          </div>
+
+          <div className="bg-white rounded-xl shadow p-6">
+            <h3 className="text-gray-500 text-sm">Total Vehicles</h3>
+            <p className="text-3xl font-bold text-green-600 mt-2">
+              {totalVehicles}
+            </p>
+          </div>
+
+          <div className="bg-white rounded-xl shadow p-6">
+            <h3 className="text-gray-500 text-sm">Heavy Traffic</h3>
+            <p className="text-3xl font-bold text-red-600 mt-2">
+              {totalHeavyTraffic}
+            </p>
+          </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-gray-500">Green Signals</h2>
-          <p className="text-3xl font-bold text-emerald-600">
-            {records.filter((item) => item.signal === "Green").length}
-          </p>
+        {/* Search & Filters */}
+        <div className="bg-white rounded-xl shadow p-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input
+              type="text"
+              placeholder="Search by Location..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+
+            <select
+              value={junctionFilter}
+              onChange={(e) => setJunctionFilter(e.target.value)}
+              className="border rounded-lg px-4 py-2"
+            >
+              {junctions.map((junction) => (
+                <option key={junction} value={junction}>
+                  {junction}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={signalFilter}
+              onChange={(e) => setSignalFilter(e.target.value)}
+              className="border rounded-lg px-4 py-2"
+            >
+              <option value="All">All Signals</option>
+              <option value="Green">Green</option>
+              <option value="Yellow">Yellow</option>
+              <option value="Red">Red</option>
+            </select>
+
+            <select
+              value={congestionFilter}
+              onChange={(e) => setCongestionFilter(e.target.value)}
+              className="border rounded-lg px-4 py-2"
+            >
+              <option value="All">All Congestion</option>
+              <option value="Low">Low</option>
+              <option value="Moderate">Moderate</option>
+              <option value="Heavy">Heavy</option>
+            </select>
+          </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-gray-500">Live Status</h2>
-          <p className="text-2xl font-bold text-red-500 animate-pulse">
-            ● Recording
-          </p>
-        </div>
-      </div>
+        {/* Loading */}
+        {loading && (
+          <div className="bg-white rounded-xl shadow p-8 text-center text-blue-600 text-lg">
+            Loading traffic records...
+          </div>
+        )}
 
-      {/* Search + Advanced Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <input
-          type="text"
-          placeholder="🔍 Search Junction..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border rounded-lg p-3"
-        />
+        {/* Error */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 rounded-lg p-4 mb-6">
+            {error}
+          </div>
+        )}
 
-        <select
-          value={junctionFilter}
-          onChange={(e) => setJunctionFilter(e.target.value)}
-          className="border rounded-lg p-3"
-        >
-          <option value="All">All Junctions</option>
-          {junctions.map((junction) => (
-            <option key={junction} value={junction}>
-              {junction}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={signalFilter}
-          onChange={(e) => setSignalFilter(e.target.value)}
-          className="border rounded-lg p-3"
-        >
-          <option value="All">All Signals</option>
-          <option value="Green">Green</option>
-          <option value="Yellow">Yellow</option>
-          <option value="Red">Red</option>
-        </select>
-
-        <select
-          value={eventFilter}
-          onChange={(e) => setEventFilter(e.target.value)}
-          className="border rounded-lg p-3"
-        >
-          <option value="All">All Events</option>
-          {events.map((event) => (
-            <option key={event} value={event}>
-              {event}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* AI Banner */}
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-        <h3 className="font-bold text-blue-700">🤖 AI Live Recording</h3>
-        <p className="text-blue-600 mt-2">
-          Traffic records are automatically generated every 15 seconds.
-        </p>
-      </div>
-
-      {/* Export Buttons */}
-      <div className="flex justify-end gap-4 mb-6">
-        <button
-          onClick={downloadPDF}
-          className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow"
-        >
-          📄 Export PDF
-        </button>
-
-        <button
-          onClick={downloadExcel}
-          className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow"
-        >
-          📊 Export Excel
-        </button>
-      </div>
-
-      {/* Traffic Records Table */}
-      <div className="bg-white shadow rounded-xl overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-blue-600 text-white">
-              <th className="p-3">Time</th>
-              <th>Junction</th>
-              <th>Vehicles</th>
-              <th>Signal</th>
-              <th>Event</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredRecords.length === 0 ? (
-              <tr>
-                <td colSpan="6" className="text-center p-8 text-gray-500">
-                  No Traffic Records Available
-                </td>
-              </tr>
-            ) : (
-              filteredRecords.map((item) => (
-                <tr
-                  key={item.id}
-                  className="border-b hover:bg-gray-50 text-center transition"
-                >
-                  <td className="p-3">{item.time}</td>
-                  <td className="font-semibold">{item.junction}</td>
-                  <td className="font-bold text-blue-600">{item.vehicles}</td>
-                  <td>
-                    <span
-                      className={`px-3 py-1 rounded-full text-white text-sm font-semibold ${
-                        item.signal === "Green"
-                          ? "bg-green-600"
-                          : item.signal === "Yellow"
-                          ? "bg-yellow-500"
-                          : "bg-red-600"
-                      }`}
-                    >
-                      {item.signal}
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      className={`px-3 py-1 rounded-full text-white text-sm font-semibold ${
-                        item.event === "Emergency Vehicle"
-                          ? "bg-red-600"
-                          : item.event === "Heavy Traffic"
-                          ? "bg-orange-500"
-                          : item.event === "Accident Reported"
-                          ? "bg-pink-600"
-                          : item.event === "Signal Changed"
-                          ? "bg-blue-600"
-                          : "bg-green-600"
-                      }`}
-                    >
-                      {item.event}
-                    </span>
-                  </td>
-                  <td>
-                    <button
-                      onClick={() => deleteRecord(item.id)}
-                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg transition"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+        {/* Table */}
+        {!loading && !error && (
+          <div className="bg-white rounded-xl shadow overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead className="bg-blue-600 text-white">
+                  <tr>
+                    <th className="px-6 py-4 text-left">Location</th>
+                    <th className="px-6 py-4 text-center">Vehicle Count</th>
+                    <th className="px-6 py-4 text-center">Congestion</th>
+                    <th className="px-6 py-4 text-center">Signal</th>
+                    <th className="px-6 py-4 text-center">Created</th>
+                    <th className="px-6 py-4 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredRecords.length > 0 ? (
+                    filteredRecords.map((item) => (
+                      <tr key={item._id} className="border-b hover:bg-gray-50">
+                        <td className="px-6 py-4 font-semibold">{item.name}</td>
+                        <td className="px-6 py-4 text-center">
+                          {item.vehicleCount}
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <span
+                            className={`px-3 py-1 rounded-full text-white text-sm ${
+                              item.congestionLevel === "Heavy"
+                                ? "bg-red-500"
+                                : item.congestionLevel === "Moderate"
+                                ? "bg-yellow-500"
+                                : "bg-green-500"
+                            }`}
+                          >
+                            {item.congestionLevel}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <span
+                            className={`px-3 py-1 rounded-full text-white text-sm ${
+                              item.signal === "Green"
+                                ? "bg-green-600"
+                                : item.signal === "Yellow"
+                                ? "bg-yellow-500"
+                                : "bg-red-600"
+                            }`}
+                          >
+                            {item.signal}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          {new Date(item.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <div className="flex justify-center gap-2">
+                            <button
+                              onClick={() => navigate(`/traffic-details/${item._id}`)}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+                            >
+                              View
+                            </button>
+                            <button
+                              onClick={() => navigate(`/edit-traffic/${item._id}`)}
+                              className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => deleteRecord(item._id)}
+                              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" className="text-center py-10 text-gray-500">
+                        No traffic records found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

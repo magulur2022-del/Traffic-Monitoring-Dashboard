@@ -34,20 +34,22 @@ const trafficSchema = new mongoose.Schema(
 
     congestionLevel: {
       type: String,
-      required: [true, "Congestion level is required"],
       enum: {
         values: ["Low", "Moderate", "Heavy"],
         message: "Congestion level must be Low, Moderate or Heavy",
       },
+      default: "Low",
+      required: true,
     },
 
     signal: {
       type: String,
-      required: [true, "Signal status is required"],
       enum: {
         values: ["Red", "Yellow", "Green"],
         message: "Signal must be Red, Yellow or Green",
       },
+      default: "Red",
+      required: true,
     },
   },
   {

@@ -14,6 +14,8 @@ import AboutPage from "./pages/AboutPage";
 import Login from "./pages/Login";
 import VehicleDetails from "./pages/VehicleDetails";
 import TrafficRecordsPage from "./pages/TrafficRecordsPage";
+import AddTraffic from "./pages/AddTraffic";
+import EditTraffic from "./pages/EditTraffic";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoadingScreen from "./components/LoadingScreen";
@@ -125,6 +127,26 @@ function AppRoutes() {
         }
       />
 
+      {/* Add Traffic */}
+      <Route
+        path="/add-traffic"
+        element={
+          <ProtectedRoute isLoggedIn={isLoggedIn}>
+            <AddTraffic />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Edit Traffic */}
+      <Route
+        path="/edit-traffic/:id"
+        element={
+          <ProtectedRoute isLoggedIn={isLoggedIn}>
+            <EditTraffic />
+          </ProtectedRoute>
+        }
+      />
+
       {/* Settings */}
       <Route
         path="/settings"
@@ -146,10 +168,7 @@ function AppRoutes() {
       />
 
       {/* Login */}
-      <Route
-        path="/login"
-        element={<Login onLogin={handleLogin} />}
-      />
+      <Route path="/login" element={<Login onLogin={handleLogin} />} />
 
       {/* Vehicle Details */}
       <Route

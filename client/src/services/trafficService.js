@@ -4,12 +4,12 @@ const API_URL = "http://localhost:8000/api/traffic";
 
 export const getAllTraffic = async () => {
   const response = await axios.get(API_URL);
-  return response.data;
+  return response.data.data;
 };
 
 export const getTrafficById = async (id) => {
   const response = await axios.get(`${API_URL}/${id}`);
-  return response.data;
+  return response.data.data;
 };
 
 export const createTraffic = async (trafficData) => {
