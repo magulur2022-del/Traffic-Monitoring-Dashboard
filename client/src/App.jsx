@@ -12,10 +12,10 @@ import TrafficSignalPage from "./pages/TrafficSignalPage";
 import TrafficJunctionPage from "./pages/TrafficJunctionPage";
 import AboutPage from "./pages/AboutPage";
 import Login from "./pages/Login";
-import VehicleDetails from "./pages/VehicleDetails";
 import TrafficRecordsPage from "./pages/TrafficRecordsPage";
 import AddTraffic from "./pages/AddTraffic";
 import EditTraffic from "./pages/EditTraffic";
+import TrafficDetails from "./pages/TrafficDetails";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoadingScreen from "./components/LoadingScreen";
@@ -147,6 +147,16 @@ function AppRoutes() {
         }
       />
 
+      {/* Traffic Details */}
+      <Route
+        path="/traffic-details/:id"
+        element={
+          <ProtectedRoute isLoggedIn={isLoggedIn}>
+            <TrafficDetails />
+          </ProtectedRoute>
+        }
+      />
+
       {/* Settings */}
       <Route
         path="/settings"
@@ -169,16 +179,6 @@ function AppRoutes() {
 
       {/* Login */}
       <Route path="/login" element={<Login onLogin={handleLogin} />} />
-
-      {/* Vehicle Details */}
-      <Route
-        path="/vehicle/:id"
-        element={
-          <ProtectedRoute isLoggedIn={isLoggedIn}>
-            <VehicleDetails onLogout={handleLogout} />
-          </ProtectedRoute>
-        }
-      />
 
       {/* 404 */}
       <Route
